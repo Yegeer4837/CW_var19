@@ -10,12 +10,12 @@ import uvicorn
 
 nest_asyncio.apply()
 
-# Асинхронное подключение к MongoDB
+# РђСЃРёРЅС…СЂРѕРЅРЅРѕРµ РїРѕРґРєР»СЋС‡РµРЅРёРµ Рє MongoDB
 client = AsyncIOMotorClient("mongodb://192.168.226.132:27017/")
 db = client["MAI_database"]
 students_collection = db["students"]
 
-# Модель Pydantic
+# РњРѕРґРµР»СЊ Pydantic
 class Students(BaseModel):
     surname: str
     group: str
@@ -26,10 +26,10 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Асинхронный метод для получения формы студентов
+# РђСЃРёРЅС…СЂРѕРЅРЅС‹Р№ РјРµС‚РѕРґ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ С„РѕСЂРјС‹ СЃС‚СѓРґРµРЅС‚РѕРІ
 @app.get("/students/form", response_class=HTMLResponse)
 async def get_students_form(request: Request, error_message: str = ""):
-    students = await students_collection.find({}, {"_id": 0}).to_list(None)  # Асинхронно получаем студентов
+    students = await students_collection.find({}, {"_id": 0}).to_list(None)  # РђСЃРёРЅС…СЂРѕРЅРЅРѕ РїРѕР»СѓС‡Р°РµРј СЃС‚СѓРґРµРЅС‚РѕРІ
     return templates.TemplateResponse(
         "students_form.html",
         {
@@ -39,7 +39,7 @@ async def get_students_form(request: Request, error_message: str = ""):
         },
     )
 
-# Асинхронный метод для добавления студента
+# РђСЃРёРЅС…СЂРѕРЅРЅС‹Р№ РјРµС‚РѕРґ РґР»СЏ РґРѕР±Р°РІР»РµРЅРёСЏ СЃС‚СѓРґРµРЅС‚Р°
 @app.post("/students/add")
 async def add_students(
     request: Request,
@@ -49,7 +49,7 @@ async def add_students(
     password: str = Form(...),
 ):
     try:
-        # Проверяем, существует ли студент с такими данными
+        # РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё СЃС‚СѓРґРµРЅС‚ СЃ С‚Р°РєРёРјРё РґР°РЅРЅС‹РјРё
         existing_student = await students_collection.find_one({
             "surname": surname,
             "group": group,
@@ -67,7 +67,7 @@ async def add_students(
         if existing_student_2:
             raise ValueError("This list number already exists in the group")
         
-        # Добавляем студента
+        # Р”РѕР±Р°РІР»СЏРµРј СЃС‚СѓРґРµРЅС‚Р°
         await students_collection.insert_one({
             "surname": surname,
             "group": group,
@@ -75,11 +75,11 @@ async def add_students(
             "password": password,
         })
 
-        # Если запрос от API-клиента, возвращаем JSON-ответ
+        # Р•СЃР»Рё Р·Р°РїСЂРѕСЃ РѕС‚ API-РєР»РёРµРЅС‚Р°, РІРѕР·РІСЂР°С‰Р°РµРј JSON-РѕС‚РІРµС‚
         if request.headers.get("accept") == "application/json":
             return JSONResponse(content={"message": "Student added successfully"}, status_code=200)
 
-        # Для HTML-ответов возвращаем шаблон формы без ошибок
+        # Р”Р»СЏ HTML-РѕС‚РІРµС‚РѕРІ РІРѕР·РІСЂР°С‰Р°РµРј С€Р°Р±Р»РѕРЅ С„РѕСЂРјС‹ Р±РµР· РѕС€РёР±РѕРє
         return templates.TemplateResponse(
             "students_form.html",
             {
@@ -87,21 +87,21 @@ async def add_students(
                 "students": await students_collection.find({}, {"_id": 0}).to_list(None),
                 "error_message": None,
             },
-            status_code=200,  # Успешный код
+            status_code=200,  # РЈСЃРїРµС€РЅС‹Р№ РєРѕРґ
         )
 
     except ValueError as ve:
         error_message = str(ve)
-        status_code = 400  # Код ошибки клиента
+        status_code = 400  # РљРѕРґ РѕС€РёР±РєРё РєР»РёРµРЅС‚Р°
     except Exception as e:
         error_message = f"Error: {str(e)}"
-        status_code = 500  # Код внутренней ошибки сервера
+        status_code = 500  # РљРѕРґ РІРЅСѓС‚СЂРµРЅРЅРµР№ РѕС€РёР±РєРё СЃРµСЂРІРµСЂР°
 
-    # Если запрос от API-клиента, возвращаем JSON с ошибкой
+    # Р•СЃР»Рё Р·Р°РїСЂРѕСЃ РѕС‚ API-РєР»РёРµРЅС‚Р°, РІРѕР·РІСЂР°С‰Р°РµРј JSON СЃ РѕС€РёР±РєРѕР№
     if request.headers.get("accept") == "application/json":
         return JSONResponse(content={"error": error_message}, status_code=status_code)
 
-    # Для HTML-ответов возвращаем шаблон с ошибкой и статус-кодом
+    # Р”Р»СЏ HTML-РѕС‚РІРµС‚РѕРІ РІРѕР·РІСЂР°С‰Р°РµРј С€Р°Р±Р»РѕРЅ СЃ РѕС€РёР±РєРѕР№ Рё СЃС‚Р°С‚СѓСЃ-РєРѕРґРѕРј
     return templates.TemplateResponse(
         "students_form.html",
         {
@@ -109,23 +109,23 @@ async def add_students(
             "students": await students_collection.find({}, {"_id": 0}).to_list(None),
             "error_message": error_message,
         },
-        status_code=status_code,  # Устанавливаем соответствующий статус-код
+        status_code=status_code,  # РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёР№ СЃС‚Р°С‚СѓСЃ-РєРѕРґ
     )
 
 @app.post("/students/delete_all")
 async def delete_all_students(request: Request):
     try:
-        # Удаляем все документы из коллекции студентов
+        # РЈРґР°Р»СЏРµРј РІСЃРµ РґРѕРєСѓРјРµРЅС‚С‹ РёР· РєРѕР»Р»РµРєС†РёРё СЃС‚СѓРґРµРЅС‚РѕРІ
         result = await students_collection.delete_many({})
 
         if result.deleted_count == 0:
             raise ValueError("No students found to delete")
 
-        # Если запрос от API-клиента, возвращаем JSON-ответ
+        # Р•СЃР»Рё Р·Р°РїСЂРѕСЃ РѕС‚ API-РєР»РёРµРЅС‚Р°, РІРѕР·РІСЂР°С‰Р°РµРј JSON-РѕС‚РІРµС‚
         if request.headers.get("accept") == "application/json":
             return JSONResponse(content={"message": "All students deleted successfully"}, status_code=200)
 
-        # Для HTML-ответов возвращаем обновленную форму
+        # Р”Р»СЏ HTML-РѕС‚РІРµС‚РѕРІ РІРѕР·РІСЂР°С‰Р°РµРј РѕР±РЅРѕРІР»РµРЅРЅСѓСЋ С„РѕСЂРјСѓ
         return templates.TemplateResponse(
             "students_form.html",
             {
@@ -133,21 +133,21 @@ async def delete_all_students(request: Request):
                 "students": [],
                 "error_message": None,
             },
-            status_code=200,  # Успешный код
+            status_code=200,  # РЈСЃРїРµС€РЅС‹Р№ РєРѕРґ
         )
 
     except ValueError as ve:
         error_message = str(ve)
-        status_code = 400  # Код ошибки клиента
+        status_code = 400  # РљРѕРґ РѕС€РёР±РєРё РєР»РёРµРЅС‚Р°
     except Exception as e:
         error_message = f"Error: {str(e)}"
-        status_code = 500  # Код внутренней ошибки сервера
+        status_code = 500  # РљРѕРґ РІРЅСѓС‚СЂРµРЅРЅРµР№ РѕС€РёР±РєРё СЃРµСЂРІРµСЂР°
 
-    # Если запрос от API-клиента, возвращаем JSON с ошибкой
+    # Р•СЃР»Рё Р·Р°РїСЂРѕСЃ РѕС‚ API-РєР»РёРµРЅС‚Р°, РІРѕР·РІСЂР°С‰Р°РµРј JSON СЃ РѕС€РёР±РєРѕР№
     if request.headers.get("accept") == "application/json":
         return JSONResponse(content={"error": error_message}, status_code=status_code)
 
-    # Для HTML-ответов возвращаем шаблон с ошибкой
+    # Р”Р»СЏ HTML-РѕС‚РІРµС‚РѕРІ РІРѕР·РІСЂР°С‰Р°РµРј С€Р°Р±Р»РѕРЅ СЃ РѕС€РёР±РєРѕР№
     return templates.TemplateResponse(
         "students_form.html",
         {
@@ -155,7 +155,7 @@ async def delete_all_students(request: Request):
             "students": await students_collection.find({}, {"_id": 0}).to_list(None),
             "error_message": error_message,
         },
-        status_code=status_code,  # Устанавливаем соответствующий статус-код
+        status_code=status_code,  # РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёР№ СЃС‚Р°С‚СѓСЃ-РєРѕРґ
     )
 
 @app.post("/students/delete")
@@ -164,11 +164,11 @@ async def delete_students(
     surname: str = Form(...),
     group: str = Form(...),
     list_number: int = Form(...),
-    search_value: str = Form(None),  # Получаем параметры поиска
-    search_field: str = Form(None)   # Получаем параметры поиска
+    search_value: str = Form(None),  # РџРѕР»СѓС‡Р°РµРј РїР°СЂР°РјРµС‚СЂС‹ РїРѕРёСЃРєР°
+    search_field: str = Form(None)   # РџРѕР»СѓС‡Р°РµРј РїР°СЂР°РјРµС‚СЂС‹ РїРѕРёСЃРєР°
 ):
     try:
-        # Пытаемся удалить студента
+        # РџС‹С‚Р°РµРјСЃСЏ СѓРґР°Р»РёС‚СЊ СЃС‚СѓРґРµРЅС‚Р°
         result = await students_collection.delete_one({
             "surname": surname,
             "group": group,
@@ -178,42 +178,42 @@ async def delete_students(
         if result.deleted_count == 0:
             raise ValueError("Student not found")
 
-        # Если запрос от API-клиента, возвращаем JSON-ответ
+        # Р•СЃР»Рё Р·Р°РїСЂРѕСЃ РѕС‚ API-РєР»РёРµРЅС‚Р°, РІРѕР·РІСЂР°С‰Р°РµРј JSON-РѕС‚РІРµС‚
         if request.headers.get("accept") == "application/json":
             return JSONResponse(content={"message": "Student deleted successfully"}, status_code=200)
 
-        # После удаления выполняем поиск с теми же параметрами
+        # РџРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ РІС‹РїРѕР»РЅСЏРµРј РїРѕРёСЃРє СЃ С‚РµРјРё Р¶Рµ РїР°СЂР°РјРµС‚СЂР°РјРё
         query = {
             search_field: {"$regex": search_value, "$options": "i"}
         } if search_value else {}
         
         students = await students_collection.find(query, {"_id": 0}).to_list(None)
 
-        # Возвращаем шаблон с результатами поиска после удаления
+        # Р’РѕР·РІСЂР°С‰Р°РµРј С€Р°Р±Р»РѕРЅ СЃ СЂРµР·СѓР»СЊС‚Р°С‚Р°РјРё РїРѕРёСЃРєР° РїРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ
         return templates.TemplateResponse(
             "students_form.html",
             {
                 "request": request,
                 "students": students,
                 "error_message": None,
-                "search_value": search_value,  # Передаем параметры поиска обратно
-                "search_field": search_field,  # Передаем параметры поиска обратно
+                "search_value": search_value,  # РџРµСЂРµРґР°РµРј РїР°СЂР°РјРµС‚СЂС‹ РїРѕРёСЃРєР° РѕР±СЂР°С‚РЅРѕ
+                "search_field": search_field,  # РџРµСЂРµРґР°РµРј РїР°СЂР°РјРµС‚СЂС‹ РїРѕРёСЃРєР° РѕР±СЂР°С‚РЅРѕ
             },
-            status_code=200,  # Успешный код
+            status_code=200,  # РЈСЃРїРµС€РЅС‹Р№ РєРѕРґ
         )
 
     except ValueError as ve:
         error_message = str(ve)
-        status_code = 400  # Код ошибки клиента
+        status_code = 400  # РљРѕРґ РѕС€РёР±РєРё РєР»РёРµРЅС‚Р°
     except Exception as e:
         error_message = f"Error: {str(e)}"
-        status_code = 500  # Код внутренней ошибки сервера
+        status_code = 500  # РљРѕРґ РІРЅСѓС‚СЂРµРЅРЅРµР№ РѕС€РёР±РєРё СЃРµСЂРІРµСЂР°
 
-    # Если запрос от API-клиента, возвращаем JSON с ошибкой
+    # Р•СЃР»Рё Р·Р°РїСЂРѕСЃ РѕС‚ API-РєР»РёРµРЅС‚Р°, РІРѕР·РІСЂР°С‰Р°РµРј JSON СЃ РѕС€РёР±РєРѕР№
     if request.headers.get("accept") == "application/json":
         return JSONResponse(content={"error": error_message}, status_code=status_code)
 
-    # Для HTML-ответов возвращаем шаблон с ошибкой
+    # Р”Р»СЏ HTML-РѕС‚РІРµС‚РѕРІ РІРѕР·РІСЂР°С‰Р°РµРј С€Р°Р±Р»РѕРЅ СЃ РѕС€РёР±РєРѕР№
     return templates.TemplateResponse(
         "students_form.html",
         {
@@ -221,27 +221,27 @@ async def delete_students(
             "students": await students_collection.find({}, {"_id": 0}).to_list(None),
             "error_message": error_message,
         },
-        status_code=status_code,  # Устанавливаем соответствующий статус-код
+        status_code=status_code,  # РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёР№ СЃС‚Р°С‚СѓСЃ-РєРѕРґ
     )
 
-    # Асинхронный метод для поиска студентов
+    # РђСЃРёРЅС…СЂРѕРЅРЅС‹Р№ РјРµС‚РѕРґ РґР»СЏ РїРѕРёСЃРєР° СЃС‚СѓРґРµРЅС‚РѕРІ
 @app.get("/students/search")
 async def search_students(request: Request, search_value: str = "", search_field: str = "surname"):
     try:
-        # Фильтр для поиска по подстроке (регистронезависимый)
+        # Р¤РёР»СЊС‚СЂ РґР»СЏ РїРѕРёСЃРєР° РїРѕ РїРѕРґСЃС‚СЂРѕРєРµ (СЂРµРіРёСЃС‚СЂРѕРЅРµР·Р°РІРёСЃРёРјС‹Р№)
         query = {
             search_field: {"$regex": search_value, "$options": "i"} 
         } if search_value else {}
-        # Получение списка студентов, соответствующих запросу
+        # РџРѕР»СѓС‡РµРЅРёРµ СЃРїРёСЃРєР° СЃС‚СѓРґРµРЅС‚РѕРІ, СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёС… Р·Р°РїСЂРѕСЃСѓ
         students = await students_collection.find(query, {"_id": 0}).to_list(None)
-         # Если студентов не найдено
+         # Р•СЃР»Рё СЃС‚СѓРґРµРЅС‚РѕРІ РЅРµ РЅР°Р№РґРµРЅРѕ
         if not students:
             raise ValueError("No students found matching your search criteria")
-        # Если запрос от API-клиента, возвращаем JSON-ответ с результатами поиска
+        # Р•СЃР»Рё Р·Р°РїСЂРѕСЃ РѕС‚ API-РєР»РёРµРЅС‚Р°, РІРѕР·РІСЂР°С‰Р°РµРј JSON-РѕС‚РІРµС‚ СЃ СЂРµР·СѓР»СЊС‚Р°С‚Р°РјРё РїРѕРёСЃРєР°
         if request.headers.get("accept") == "application/json":
             return JSONResponse(content={"students": students}, status_code=200)
 
-        # Для HTML-ответов возвращаем шаблон с результатами поиска
+        # Р”Р»СЏ HTML-РѕС‚РІРµС‚РѕРІ РІРѕР·РІСЂР°С‰Р°РµРј С€Р°Р±Р»РѕРЅ СЃ СЂРµР·СѓР»СЊС‚Р°С‚Р°РјРё РїРѕРёСЃРєР°
         return templates.TemplateResponse(
             "students_form.html",
             {
@@ -251,18 +251,18 @@ async def search_students(request: Request, search_value: str = "", search_field
                 "search_value": search_value,
                 "search_field": search_field,
             },
-            status_code=200,  # Успешный код
+            status_code=200,  # РЈСЃРїРµС€РЅС‹Р№ РєРѕРґ
         )
     
     except Exception as e:
         error_message = f"Error: {str(e)}"
-        status_code = 404 # Код внутренней ошибки сервера
+        status_code = 404 # РљРѕРґ РІРЅСѓС‚СЂРµРЅРЅРµР№ РѕС€РёР±РєРё СЃРµСЂРІРµСЂР°
 
-        # Если запрос от API-клиента, возвращаем JSON с ошибкой
+        # Р•СЃР»Рё Р·Р°РїСЂРѕСЃ РѕС‚ API-РєР»РёРµРЅС‚Р°, РІРѕР·РІСЂР°С‰Р°РµРј JSON СЃ РѕС€РёР±РєРѕР№
         if request.headers.get("accept") == "application/json":
             return JSONResponse(content={"error": error_message}, status_code=status_code)
 
-        # Для HTML-ответов возвращаем шаблон с ошибкой
+        # Р”Р»СЏ HTML-РѕС‚РІРµС‚РѕРІ РІРѕР·РІСЂР°С‰Р°РµРј С€Р°Р±Р»РѕРЅ СЃ РѕС€РёР±РєРѕР№
         return templates.TemplateResponse(
             "students_form.html",
             {
@@ -270,7 +270,7 @@ async def search_students(request: Request, search_value: str = "", search_field
                 "students": students,
                 "error_message": error_message,
             },
-            status_code=status_code,  # Устанавливаем соответствующий статус-код
+            status_code=status_code,  # РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёР№ СЃС‚Р°С‚СѓСЃ-РєРѕРґ
         )
 
 
