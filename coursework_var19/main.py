@@ -5,10 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from motor.motor_asyncio import AsyncIOMotorClient  
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-import nest_asyncio
 import uvicorn
-
-nest_asyncio.apply()
 
 # Асинхронное подключение к MongoDB
 client = AsyncIOMotorClient("mongodb://192.168.226.132:27017/")
