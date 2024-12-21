@@ -6,18 +6,18 @@
 2.  При помощи VS code открыть папку, в которой находится распакованный архив.
 3. Установка виртуальной среды vevn:
    
-       3.1. открыть терминал VS code и ввести: python3 -m venv venv (для всех ОС);
+       3.1. открыть терминал VS code и ввести:** python3 -m venv venv** (для всех ОС);
    
-       3.2. venv\Scripts\activate.bat для WINDOWS (если backend запускать на версии VS code для Windows)
-          или source venv/bin/activate для LINUX(Ubuntu) (если backend запускать на версии VS code для Linux)
+       3.2.** venv\Scripts\activate.bat** для WINDOWS (если backend запускать на версии VS code для Windows)
+          или **source venv/bin/activate** для LINUX(Ubuntu) (если backend запускать на версии VS code для Linux)
    
        3.3. Если все шаги выполнены верно, то после активации виртуальной среды появится приписка (venv) в терминале VS code;
    
        3.4. Устанавливаем необходимые пакеты для работы backend:
-        pip install fastapi motor pydantic uvicorn jinja2 aiofiles python-multipart
+        **pip install fastapi motor pydantic uvicorn jinja2 aiofiles python-multipart**
    
        3.5. Для деактивации виртуальной среды необходимо ввести(если необходимо из нее выйти):
-        deactivate venv
+       ** deactivate venv**
 
 5. Если на виртуальной машине с Ubuntu не установлен докер, то необходимо выполнить следующие команды:
 
