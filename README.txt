@@ -10,7 +10,7 @@
       или source venv/bin/activate для LINUX(Ubuntu) (если backend запускать на версии VS code для Linux)
     3.3) Если все шаги выполнены верно, то после активации виртуальной среды появится приписка (venv) в терминале VS code;
     3.4) Устанавливаем необходимые пакеты для работы backend:
-        pip install fastapi motor pydantic uvicorn jinja2 aiofiles
+        pip install fastapi motor pydantic uvicorn jinja2 aiofiles python-multipart
     3.5) Для деактивации виртуальной среды необходимо ввести(если необходимо из нее выйти):
         deactivate venv
 
@@ -46,4 +46,6 @@
 
 7) Открыть папку с распакованным архивом из пункта 2), а файле main.py указать ip адрес к БД:
       7.1) Если С Window на Ubuntu, то:  client = AsyncIOMotorClient("mongodb://адрес_виртаульной машины:27017/")
-      7.2) Если все на Ubuntu, то:       client = AsyncIOMotorClient("mongodb://localhost:27017/")
+      7.2) Если все на Ubuntu, то:       client = AsyncIOMotorClient("mongodb://localhost:27017/") или client = AsyncIOMotorClient("mongodb://адрес_виртаульной машины:27017/")
+
+8) Если все шаги выполнены верно, то в браузере по адресу http://127.0.0.1:8000/students/form откроется html форма для работы с БД.
