@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить студента</title>
+    <style>
+        h1{
+            text-align: Center;
+            border: 2px solid black; 
+            width: 600px; 
+            padding: 10px;  
+            background-color: white;
+            margin: 0 auto;
+        }
+        h2{
+            text-align: left;
+            border: 2px solid black; 
+            width: 450px; 
+            padding: 5px;  
+            background-color: white;
+            text-align: center;
+        }
+        body {
+            background-image: url('/static/background.jpg'); 
+            background-repeat: no-repeat;
+            background-size: cover;  
+            font-family: Arial, sans-serif;  
+        }
+        table {
+            width: 60%;
+            border-collapse: collapse;
+            
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th, td {
+            background-color: #f2f2f2;
+        }
+        .error-message, .success-message {
+        color: white;
+        padding: 10px;
+        margin: 10px auto; /* Центрирование */
+        border-radius: 5px;
+        text-align: center;
+        font-weight: bold;
+        width: 50%; /* Ширина сообщения */
+        max-width: 600px; /* Максимальная ширина */
+        }
+        .error-message {
+        background-color: red;
+        border: 2px solid darkred;
+         }
+        .success-message {
+        background-color: green;
+        border: 2px solid darkgreen;
+        }
+    </style>
+</head>
+<body>
+    <h1>База Данных студентов</h1>
+    <h2>Добавление данных в базу</h2>
+<form action="/students/add" method="POST">
+    <table>
+        <tr>
+            <th>Атрибуты</th>
+            <th>Поле для ввода</th>
+        </tr>
+        <tr>
+            <td><label for="surname">Фамилия:</label></td>
+            <td><input type="text" id="surname" name="surname" required></td>
+        </tr>
+        <tr>
+            <td><label for="group">Группа:</label></td>
+            <td><input type="text" id="group" name="group" required></td>
+        </tr>
+        <tr>
+            <td><label for="list_number">Номер по списку:</label></td>
+            <td><input type="number" id="list_number" name="list_number" min="1" required></td>
+        </tr>
+        <tr>
+            <td><label for="password">Пароль:</label></td>
+            <td>
+                <input type="password" id="password" name="password" required>
+                <button type="button" onclick="toggleTablePassword('password')">Показать</button>
+            </td>
+        </tr>
+    </table>
+    <br>
+    <button type="submit">Добавить студента</button>
+    
+    {% if error_message %}
+    <div class="error-message">
+        {{ error_message }}
+    </div>
+    {% endif %}
+
+</form>
+
+    <h2>Список студентов: 
+    <form action="/students/form" method="GET" style="display:inline;">
+    <button type="submit">Показать список</button>
+    </form>
+    <form action="/students/delete_all" method="POST">
+    <button type="submit">Удалить всех студентов из базы</button>
+    </form></h2>
+    <h2>
+        <form action="/students/search" method="GET">
+            <label for="search_value">Поиск:</label>
+            <input type="text" id="search_value" name="search_value" placeholder="Введите значение" required value="{{ search_value }}">
+        
+            <select id="search_field" name="search_field" required>
+                <option value="surname" {% if search_field == 'surname' %}selected{% endif %}>Фамилия</option>
+                <option value="group" {% if search_field == 'group' %}selected{% endif %}>Группа</option>
+                
+            </select>
+            <button type="submit">Поиск</button></h2>
+        </form>
+    <table>
+        <tr>
+            <th>Фамилия</th>
+            <th>Группа</th>
+            <th>Номер по списку</th>
+            <th>Пароль</th>
+            <th>Действия</th>
+        </tr>
+        {% for student in students %}
+        <tr>
+            <td>{{ student.surname }}</td>
+            <td>{{ student.group }}</td>
+            <td>{{ student.list_number }}</td>
+            <td>
+                <input type="password" id="password_{{ loop.index }}" value="{{ student.password }}" readonly>
+                <button type="button" onclick="toggleTablePassword('password_{{ loop.index }}')">Показать</button>
+            </td>
+            <td>
+                <form action="/students/delete" method="POST" style="display:inline;">
+                    <input type="hidden" name="surname" value="{{ student.surname }}">
+                    <input type="hidden" name="group" value="{{ student.group }}">
+                    <input type="hidden" name="list_number" value="{{ student.list_number }}">
+                    
+                    <!-- Добавлены скрытые поля для поиска -->
+                    <input type="hidden" name="search_value" value="{{ search_value }}">
+                    <input type="hidden" name="search_field" value="{{ search_field }}">
+                
+                    <button type="submit">Удалить</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+<script>
+
+    function toggleTablePassword(inputId) {
+        const passwordInput = document.getElementById(inputId);
+        const button = event.target;
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            button.textContent = 'Скрыть';
+        } else {
+            passwordInput.type = 'password';
+            button.textContent = 'Показать';
+        }
+    }
+</script>
+</html>
