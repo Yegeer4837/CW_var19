@@ -2,12 +2,12 @@ import random
 import requests
 import string
 
-# Function to generate a random password
+# Генерация паролей
 def generate_password(length=8):
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for i in range(length))
 
-# Function to generate random student data
+# Генерация студентов
 def generate_student_data():
     surnames = [
     'Ivanov', 'Petrov', 'Sidorov', 'Alexeev', 'Pavlov', 'Nikolaev', 'Vasilyev', 'Smirnov', 'Mikhailov',
@@ -39,18 +39,15 @@ def generate_student_data():
         'password': password
     }
 
-# The URL of your API for adding a student
+# куда отправлять запрос
 url = "http://127.0.0.1:8000/students/add"
 
-# Number of students to be added
+# Кол-во сгенерированных студентов(можно менять)
 num_students = 50
 
 for _ in range(num_students):
     student_data = generate_student_data()
     response = requests.post(url, data=student_data)
+    print("Ok")
     
-    # Print server response for tracking the process
-    if response.status_code == 303:
-        print(f"Student {student_data['surname']} added successfully!")
-    else:
-        print(f"Error while adding student {student_data['surname']}: {response.text}")
+
