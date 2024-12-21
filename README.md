@@ -51,10 +51,10 @@
      **mongosh**
      это позвволит просматривать содержимое базы данных в терминальном интерфейсе mongo
 
-7. Открыть папку с распакованным архивом из пункта 2), а файле main.py указать ip адрес к БД:
+7. Открыть папку с распакованным архивом из пункта 2) и в файле main.py указать ip адрес к БД:
 
-        7.1. Если С Window на Ubuntu, то:  client = AsyncIOMotorClient("mongodb://адрес_виртаульной машины:27017/")
+        7.1. Если С Window на Ubuntu, то:  client = AsyncIOMotorClient("mongodb://адрес_виртуальной_машины:27017/")
    
-        7.2. Если все на Ubuntu, то:       client = AsyncIOMotorClient("mongodb://localhost:27017/") или client = AsyncIOMotorClient("mongodb://адрес_виртаульной машины:27017/")
+        7.2. Если все на Ubuntu, то:       client = AsyncIOMotorClient("mongodb://localhost:27017/") или client = AsyncIOMotorClient("mongodb://адрес_виртуальной_машины:27017/")
 
 8. Если все шаги выполнены верно, то в браузере по адресу http://127.0.0.1:8000/students/form откроется html форма для работы с БД.
