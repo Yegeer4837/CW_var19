@@ -13,7 +13,7 @@
         pip install fastapi motor pydantic uvicorn jinja2 aiofiles
     3.5) Для деактивации виртуальной среды необходимо ввести(если необходимо из нее выйти):
         deactivate venv
-4) Если на виртуальной машине с Ubuntu не установлен докер, то необходимо выполнить следующие команды:
+5) Если на виртуальной машине с Ubuntu не установлен докер, то необходимо выполнить следующие команды:
 
      4.1) # Add Docker's official GPG key:
           sudo apt-get update
